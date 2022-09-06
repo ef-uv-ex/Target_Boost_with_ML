@@ -20,6 +20,7 @@ from datetime import datetime
 # Pull custom functions
 from Process_IFFT import process_ifft
 from Select_Data import select_data
+from Process_FFE import process_ffe
 
 # %% Constants
 
@@ -179,6 +180,8 @@ if __name__ == '__main__':
     ROOT, dir_DATA, dir_FIG = build_directories()
     
     rcs = select_data(dir_DATA)
+
+    rcs = process_ffe(rcs)
 
     # plot_polar_rcs = 'y'#input("Plot polar RCS? (at 7 GHz)")
     # if plot_polar_rcs == 'y':
