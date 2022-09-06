@@ -22,7 +22,8 @@ RCS class object
 rcs_keys = ['frq', 
             'ph',
             'th', 
-            'pp', 
+            'tt', 
+            'pp',
             'tp', 
             'pt',
             'header']

@@ -21,6 +21,7 @@ from datetime import datetime
 from Process_IFFT import process_ifft
 from Select_Data import select_data
 from Process_FFE import process_ffe
+from Extract_Data import extract_data
 
 # %% Constants
 
@@ -53,9 +54,9 @@ NYQUIST = 2
 def user_message(_text, _type):
 
     if _type == 'warno':
-        print(bcolors.WARNING + _text + bcolors.ENDC + '\n', flush=True)
+        print(bcolors.WARNING + _text.center(len(_text)*2).capitalize() + bcolors.ENDC + '\n', flush=True)
     elif _type == 'prompt':
-        print(bcolors.OKGREEN + _text + bcolors.ENDC + '\n', flush=True)
+        print(bcolors.OKGREEN + _text.center(len(_text)*2) + bcolors.ENDC + '\n', flush=True)
     elif _type == 'notice':
         print(bcolors.OKBLUE + _text + bcolors.ENDC + '\n', flush=True)
     elif _type == 'fail':
@@ -100,75 +101,6 @@ def plotter(_fig_num, _data, _labels):
     plt.xlabel(_labels[2])
     plt.grid(which='both', axis='both', linestyle=':')
     plt.legend()
-
-"""Extract Data from an RCS struct"""
-def extract_data(_rcs_data, _f, _a, _pol):
-    
-    """Extract the data from an AFIT RCS struct over a certain band of 
-    frequencies, azimuthal angles, or polarizations
-    
-    Inputs:
-            _rcs_data:  input rcs data struct
-            _f: requested frequeny, or frequency range. Expects np array
-            _a:  requested angles
-            _pol:  requested polarizations
-    """
-    
-    # Test instances for type -- set to array if needed
-    args =[_f, _a, _pol]
-    for i, v in enumerate(args):
-        if ~isinstance(v, np.ndarray):
-            args[i] = np.array(v)
-    
-    # Instantiate new instance
-    new_struct = rcs_data()
-    _frq = _rcs_data.frq
-    _ph = _rcs_data.ph
-    _th = _rcs_data.th
-    _tt = _rcs_data.tt
-    _pp = _rcs_data.pp
-    _tp = _rcs_data.tp
-    _pt = _rcs_data.pt
-    
-    args = [_tt, _pp, _tp, _pt]
-    
-    # Parse input angles
-    nA = len(_a)
-    if nA!= 0:
-        if nA > 2:
-            print("Angle range too large. Pick a min and max only. ")
-            return
-        elif nA == 1:
-            print("Extracting angles at {0}".format(str(_a)))
-            _a_idx = np.where(_frq == _f[0])
-            for i, v in enumerate(args):
-                args[i] = args[i][:, _a_idx]
-        elif nA == 2:
-            print("Extracting angles at {0} and {1}".format(str(_a[0]), str(_a[1])))
-            _a_idx = [ np.where(_ph == _a[0]), np.where(_ph == _a[1]) ]
-            for i, v in enumerate(args):
-                args[i] = args[i][_a_idx[0]:_a_idx[1], :]
-    else:
-        print("No angles entered.")
-        
-    # Parse input frequencies
-    nF = len(_f) 
-    if nF != 0:
-        if nF > 2:
-            print("Frequencies range too large. Pick a min and max only.")
-            return
-        elif nF == 1:
-            print("Extracting frequency at {0}.".format(str(_f)))
-            _f_idx = np.where(_frq == _f[0])
-            for i, v in enumerate(args):
-                args[i] = args[i][_f_idx, :]
-        elif nF == 2:
-            print("Extracting frequencies at {0}, and {1}.".format(str(_f[0]), str(_f[1])))
-            _f_idx = [ np.where(_frq == _f[0]), np.where(_frq == _f[1]) ]
-            for i, v in enumerate(args):
-                args[i] = args[i][_f_idx[0]:_f_idx[1], :]
-    else:
-        print("No frequencies entered.")
      
 
 
@@ -178,10 +110,15 @@ def extract_data(_rcs_data, _f, _a, _pol):
 if __name__ == '__main__':
     
     ROOT, dir_DATA, dir_FIG = build_directories()
-    
-    rcs = select_data(dir_DATA)
 
-    rcs = process_ffe(rcs)
+    _text = 'Select measured data.'
+    user_message(_text, usr_msg.prompt)    
+    rcs_measured = select_data(dir_DATA)
+    rcs_measured = extract_data(rcs_measured, [10], [180])
+    
+    _text = 'Select simulated data.'
+    user_message(_text, usr_msg.prompt) 
+    rcs_simulated = select_data(dir_DATA)
 
     # plot_polar_rcs = 'y'#input("Plot polar RCS? (at 7 GHz)")
     # if plot_polar_rcs == 'y':
