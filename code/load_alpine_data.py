@@ -15,11 +15,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os, time, math
 from datetime import datetime
-import scipy.io as sio # To read in .mat file types
 
-# Tkinter utilites for GUI interaction
-import tkinter as tk
-from tkinter import filedialog as fd # Used to pull files via gui
+
+# Pull custom functions
+from Process_IFFT import process_ifft
+from Select_Data import select_data
 
 # %% Constants
 
@@ -45,20 +45,6 @@ class usr_msg:
     
 NYQUIST = 2  
 
-# %% Data object
-
-class rcs_data():
-    
-    def __init__(self):
-        frq = []
-        ph = []
-        th = []
-        tt = []
-        pp = []
-        tp = []
-        pt = []
-        header = []
-        
 
 #%% Functions
 
@@ -114,15 +100,17 @@ def plotter(_fig_num, _data, _labels):
     plt.grid(which='both', axis='both', linestyle=':')
     plt.legend()
 
+"""Extract Data from an RCS struct"""
 def extract_data(_rcs_data, _f, _a, _pol):
     
     """Extract the data from an AFIT RCS struct over a certain band of 
     frequencies, azimuthal angles, or polarizations
     
     Inputs:
+            _rcs_data:  input rcs data struct
             _f: requested frequeny, or frequency range. Expects np array
-            _
-    
+            _a:  requested angles
+            _pol:  requested polarizations
     """
     
     # Test instances for type -- set to array if needed
@@ -141,25 +129,46 @@ def extract_data(_rcs_data, _f, _a, _pol):
     _tp = _rcs_data.tp
     _pt = _rcs_data.pt
     
-    # Iteraete over frequencies
-    if len(_f != 0):
-        
-        # Test for arg count on input
-        N = len(_f)
-        
-        # handle 3 cases for 1, 2, or more freqs
-        if N > 2:
-            print("Frequencies range too large. Pick two, and only two. ")
+    args = [_tt, _pp, _tp, _pt]
+    
+    # Parse input angles
+    nA = len(_a)
+    if nA!= 0:
+        if nA > 2:
+            print("Angle range too large. Pick a min and max only. ")
             return
+        elif nA == 1:
+            print("Extracting angles at {0}".format(str(_a)))
+            _a_idx = np.where(_frq == _f[0])
+            for i, v in enumerate(args):
+                args[i] = args[i][:, _a_idx]
+        elif nA == 2:
+            print("Extracting angles at {0} and {1}".format(str(_a[0]), str(_a[1])))
+            _a_idx = [ np.where(_ph == _a[0]), np.where(_ph == _a[1]) ]
+            for i, v in enumerate(args):
+                args[i] = args[i][_a_idx[0]:_a_idx[1], :]
+    else:
+        print("No angles entered.")
         
-        elif N == 1:
-            print("Extracting frequency at XX")
+    # Parse input frequencies
+    nF = len(_f) 
+    if nF != 0:
+        if nF > 2:
+            print("Frequencies range too large. Pick a min and max only.")
+            return
+        elif nF == 1:
+            print("Extracting frequency at {0}.".format(str(_f)))
             _f_idx = np.where(_frq == _f[0])
-            
-        
-    
-    
-    
+            for i, v in enumerate(args):
+                args[i] = args[i][_f_idx, :]
+        elif nF == 2:
+            print("Extracting frequencies at {0}, and {1}.".format(str(_f[0]), str(_f[1])))
+            _f_idx = [ np.where(_frq == _f[0]), np.where(_frq == _f[1]) ]
+            for i, v in enumerate(args):
+                args[i] = args[i][_f_idx[0]:_f_idx[1], :]
+    else:
+        print("No frequencies entered.")
+     
 
 
 
@@ -169,100 +178,33 @@ if __name__ == '__main__':
     
     ROOT, dir_DATA, dir_FIG = build_directories()
     
-    # identify data to load
-    root = tk.Tk()
-    # root.withdraw()
-    root.lift()
-    path = fd.askopenfilename(initialdir=dir_DATA)
-    root.destroy()
+    rcs = select_data(dir_DATA)
 
-    # Pull the rsr object from matlab
-    data = sio.loadmat(path, mdict=None, appendmat=True)
-    keys = list(data.keys())
-    data = data[keys[-1]]
-    data = data[0,0]
+    # plot_polar_rcs = 'y'#input("Plot polar RCS? (at 7 GHz)")
+    # if plot_polar_rcs == 'y':
+    #     f_idx = np.where( rcs_data.frq == 7)[0][0]
+    #     s_tt = 20*np.log10(np.abs(rcs_data.tt[f_idx, :]))
+    #     s_pp = 20*np.log10(np.abs(rcs_data.pp[f_idx, :]))
+    #     a = rcs_data.ph
+        
+    #     plt.plot(a, s_tt)
+    #     plt.plot(a, s_pp)
+        
+    #     # fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
+    #     # ax.plot(a, s_tt, label='V pol')
+    #     # # ax.plot(a, 20*np.log10(np.abs(s_pp)), label='H pol')
+    #     # # ax.set_rmax(2)
+    #     # # ax.set_rticks([0.5, 1, 1.5, 2])  # Less radial ticks
+    #     # # ax.set_rlabel_position(-22.5)  # Move radial labels away from plotted line
+    #     # ax.grid(True)
+        
+    #     # ax.set_title("RCS Plot", va='bottom')
+    #     # plt.show()
     
-    rcs_data = rcs_data()
-    rcs_data.frq = np.asarray(data[0])[0]
-    rcs_data.ph = np.asarray(data[1])[0]
-    rcs_data.th = data[2]
-    rcs_data.tt = np.asarray(data[12])
-    rcs_data.pp = np.asarray(data[13])
-    rcs_data.tp = data[14]
-    rcs_data.pt = data[15]
-    rcs_data.header = data[16]
-    
-    del data
-    
-    plot_polar_rcs = 'y'#input("Plot polar RCS? (at 7 GHz)")
-    if plot_polar_rcs == 'y':
-        f_idx = np.where( rcs_data.frq == 7)[0][0]
-        s_tt = 20*np.log10(np.abs(rcs_data.tt[f_idx, :]))
-        s_pp = 20*np.log10(np.abs(rcs_data.pp[f_idx, :]))
-        a = rcs_data.ph
+    # process_ift = 'y'#input("Process IFFT?")
+    # if process_ift == 'y':
         
-        plt.plot(a, s_tt)
-        plt.plot(a, s_pp)
-        
-        # fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
-        # ax.plot(a, s_tt, label='V pol')
-        # # ax.plot(a, 20*np.log10(np.abs(s_pp)), label='H pol')
-        # # ax.set_rmax(2)
-        # # ax.set_rticks([0.5, 1, 1.5, 2])  # Less radial ticks
-        # # ax.set_rlabel_position(-22.5)  # Move radial labels away from plotted line
-        # ax.grid(True)
-        
-        # ax.set_title("RCS Plot", va='bottom')
-        # plt.show()
-    
-    process_ift = 'y'#input("Process IFFT?")
-    if process_ift == 'y':
-        
-        # Need to grab the first col of measurement data
-        # Each row of measurement data is a measure at a freq, at that inc angle
-        # Lets work with column one (0 angle) for now
-        rcs_tt = np.transpose(np.asarray(rcs_data.tt[:, 0]))
-        # F = np.asarray(rcs_data.tt)[:, np.where(rcs_data.frq == 7)[0][0]]
-        F = np.asarray(rcs_data.frq)
-        
-        """Process measurement data for frequency domain plot"""
-        S = 20*np.log10(np.abs(rcs_tt))
-        
-        fig_num = 'Frequency Domain Plot'
-        plot_labels = [
-            r'Amplitude vs Frequency for $\phi = 0$', 
-            'Amplitude, [dB]', 
-            'Frequency, [GHz]',
-            ]
-        plot_data = [F, S]
-        plotter(fig_num, plot_data, plot_labels)
-        
-        
-        """Process measurement data for Time Domain Conversion"""
-        # Define fourier values need for the IFFT
-        n_bandwidth = len(F)                    # Frequency count for collected BW
-        bandwidth = (F[-1] - F[0])*1e9          # Collected BW
-        frq_res = bandwidth/(n_bandwidth - 1)   # Frq step resolution
-        unamb_T = 1/frq_res                     # Unambiguous total time
-        T_res = 1/bandwidth                     # time resolution step
-        n_pow = math.ceil(math.log(NYQUIST*(n_bandwidth-1), 2))
-        n_rng_bins = int(2**(n_pow + 1 ))       # Number of bins for time domain
-        
-        # Time vector 
-        T = np.linspace(-unamb_T/2, unamb_T/2, n_rng_bins) - unamb_T/n_rng_bins/2
-        
-        # Apply the inverse FFT
-        A = np.fft.ifft(rcs_tt, 2**n_pow)
-        A = np.concatenate((np.flip(A), A))
-        
-        fig_num = 'Time Domain Impulse'
-        plot_labels = [
-            r'Impulse vs Time for $\phi = 0$', 
-            'Amplitude, [V(?)]', 
-            'Time, [ns]',
-            ]
-        plot_data = [T*1e9, np.abs(A)]
-        plotter(fig_num, plot_data, plot_labels)
+
     
     
     
