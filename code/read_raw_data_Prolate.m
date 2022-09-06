@@ -1,0 +1,78 @@
+%% Load the data from the active data folder
+
+clc;
+clear all;
+close all;
+
+% Grab data time
+format = 'yyyymmdd';
+t = datestr(now, format);
+
+
+% Move directory
+% dir_CODE = "G:\Rofrano_Thesis\Project\code";
+% dir_FIG = "G:\Rofrano_Thesis\Project\figures";
+% dir_DATA = "G:\Rofrano_Thesis\Project\data\Prolate";
+dir_CODE = "C:\Users\mattr\OneDrive\Desktop\Target_Boost_with_ML\code";
+dir_FIG = "C:\Users\mattr\OneDrive\Desktop\Target_Boost_with_ML\figures";
+dir_DATA = "C:\Users\mattr\OneDrive\Desktop\Target_Boost_with_ML\data\Prolate";
+cd(dir_DATA);
+
+RCS_CLIM = [-60,20];
+
+%% Import and organize data
+
+% Load exact data
+cyl_750_exact = load('cyl750.mat').cyl750;
+
+% Load measured data
+cyl750_cbk = readLintek('cyl_mount.cbk');
+cyl750 = readLintek('cyl_750.cal');
+tar_cbk = readLintek('tar_mount.bkg');
+tar_nocal = readLintek('tar_prolate.tar');
+
+%% Calibrate
+
+tar_cal = calibrateRCS(tar_nocal, tar_cbk, cyl750, cyl750_cbk, cyl_750_exact);
+
+
+%% Save the thing
+
+cd(dir_DATA)
+filename = strcat(t, '_prolate');
+save(filename, 'tar_cal');
+
+%% Produce Plots
+close('all')
+
+% Plot global RCS
+plotGlobalRCS(tar_cal, 'caxis',RCS_CLIM);
+plotGlobalRCS(tar_cal, 'caxis',RCS_CLIM);
+
+% Plot RCS cuts in polar format
+tar_cal_7 = extractData(tar_cal, 'frq', 10);
+plotRCS(tar_cal_7, 'polar', 'copol', 'caxis',RCS_CLIM);
+plotRCS(tar_cal_7, 'copol', 'caxis',RCS_CLIM);
+
+
+%% Load the FEKO data
+
+% cd("G:\Rofrano_Thesis\RCS_Targets\Prolate_Spheroid");
+% tar_true = readFeko('mini_arrow_20220823.ffe')
+
+%% Plot the FEKO results
+% close('all')
+% 
+% % Plot global RCS
+% plotGlobalRCS(tar_true, 'caxis',RCS_CLIM);
+% plotGlobalRCS(tar_true, 'caxis',RCS_CLIM);
+% 
+% % Plot RCS cuts in polar format
+% tar_true_7 = extractData(tar_true, 'frq', 7);
+% plotRCS(tar_true_7, 'polar', 'copol', 'caxis',RCS_CLIM);
+% plotRCS(tar_true_7, 'copol', 'caxis',RCS_CLIM);
+% 
+% filename = strcat(t, '_prolate_true');
+% save(filename, 'prolate_true');
+
+

@@ -45,6 +45,21 @@ class usr_msg:
     
 NYQUIST = 2  
 
+# %% Data object
+
+class rcs_data():
+    
+    def __init__(self):
+        frq = []
+        ph = []
+        th = []
+        tt = []
+        pp = []
+        tp = []
+        pt = []
+        header = []
+        
+
 #%% Functions
 
 """User message system -- colros used to denote message type"""
@@ -99,20 +114,54 @@ def plotter(_fig_num, _data, _labels):
     plt.grid(which='both', axis='both', linestyle=':')
     plt.legend()
 
-# %% Data object
-
-class capture_data():
+def extract_data(_rcs_data, _f, _a, _pol):
     
-    def __init__(self):
-        frq = []
-        ph = []
-        th = []
-        tt = []
-        pp = []
-        tp = []
-        pt = []
-        header = []
+    """Extract the data from an AFIT RCS struct over a certain band of 
+    frequencies, azimuthal angles, or polarizations
+    
+    Inputs:
+            _f: requested frequeny, or frequency range. Expects np array
+            _
+    
+    """
+    
+    # Test instances for type -- set to array if needed
+    args =[_f, _a, _pol]
+    for i, v in enumerate(args):
+        if ~isinstance(v, np.ndarray):
+            args[i] = np.array(v)
+    
+    # Instantiate new instance
+    new_struct = rcs_data()
+    _frq = _rcs_data.frq
+    _ph = _rcs_data.ph
+    _th = _rcs_data.th
+    _tt = _rcs_data.tt
+    _pp = _rcs_data.pp
+    _tp = _rcs_data.tp
+    _pt = _rcs_data.pt
+    
+    # Iteraete over frequencies
+    if len(_f != 0):
         
+        # Test for arg count on input
+        N = len(_f)
+        
+        # handle 3 cases for 1, 2, or more freqs
+        if N > 2:
+            print("Frequencies range too large. Pick two, and only two. ")
+            return
+        
+        elif N == 1:
+            print("Extracting frequency at XX")
+            _f_idx = np.where(_frq == _f[0])
+            
+        
+    
+    
+    
+
+
 
 # %% Main loop body
 
@@ -133,7 +182,7 @@ if __name__ == '__main__':
     data = data[keys[-1]]
     data = data[0,0]
     
-    rcs_data = capture_data()
+    rcs_data = rcs_data()
     rcs_data.frq = np.asarray(data[0])[0]
     rcs_data.ph = np.asarray(data[1])[0]
     rcs_data.th = data[2]
