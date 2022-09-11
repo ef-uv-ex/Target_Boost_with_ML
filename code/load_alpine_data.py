@@ -22,6 +22,7 @@ from Process_IFFT import process_ifft
 from Select_Data import select_data
 from Process_FFE import process_ffe
 from Extract_Data import extract_data
+from Plot_Data import plot_data
 
 # %% Constants
 
@@ -111,39 +112,29 @@ if __name__ == '__main__':
     
     ROOT, dir_DATA, dir_FIG = build_directories()
 
-    _text = 'Select measured data.'
+    # _text = 'Load Mini-Arrow measurement data.'
+    # user_message(_text, usr_msg.prompt)    
+    # m_arrow = select_data(dir_DATA)
+    # m_arrow = extract_data(m_arrow, [9.5, 10.5])
+    
+    # _text = 'Load Mini-Arrow simulated data.'
+    # user_message(_text, usr_msg.prompt) 
+    # s_arrow = select_data(dir_DATA)
+    
+    _text = 'Load prolate measurement data.'
     user_message(_text, usr_msg.prompt)    
-    rcs_measured = select_data(dir_DATA)
-    rcs_measured = extract_data(rcs_measured, [10], [180])
+    m_prolate = select_data(dir_DATA)
     
-    _text = 'Select simulated data.'
+    _text = 'Load prolate simulated data.'
     user_message(_text, usr_msg.prompt) 
-    rcs_simulated = select_data(dir_DATA)
+    s_prolate = select_data(dir_DATA)
 
-    # plot_polar_rcs = 'y'#input("Plot polar RCS? (at 7 GHz)")
-    # if plot_polar_rcs == 'y':
-    #     f_idx = np.where( rcs_data.frq == 7)[0][0]
-    #     s_tt = 20*np.log10(np.abs(rcs_data.tt[f_idx, :]))
-    #     s_pp = 20*np.log10(np.abs(rcs_data.pp[f_idx, :]))
-    #     a = rcs_data.ph
-        
-    #     plt.plot(a, s_tt)
-    #     plt.plot(a, s_pp)
-        
-    #     # fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
-    #     # ax.plot(a, s_tt, label='V pol')
-    #     # # ax.plot(a, 20*np.log10(np.abs(s_pp)), label='H pol')
-    #     # # ax.set_rmax(2)
-    #     # # ax.set_rticks([0.5, 1, 1.5, 2])  # Less radial ticks
-    #     # # ax.set_rlabel_position(-22.5)  # Move radial labels away from plotted line
-    #     # ax.grid(True)
-        
-    #     # ax.set_title("RCS Plot", va='bottom')
-    #     # plt.show()
+    # Plot the aximuth cut data
+    plot_data(m_prolate, s_prolate)
+
+    #s_prolate = extract_data(s_prolate, _a=[0, 90, 180, 270])
+    #m_prolate = extract_data(m_prolate, _f=[9.5, 10.51], _a=[0, 90, 180, 270])
     
-    # process_ift = 'y'#input("Process IFFT?")
-    # if process_ift == 'y':
-        
 
     
     

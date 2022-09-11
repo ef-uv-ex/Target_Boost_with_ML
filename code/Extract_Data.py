@@ -25,15 +25,23 @@ def extract_data(rcs, _f=None, _a=None, _pol=None):
     
     # Create empty dict with correct keys pre-loaded
     # ['frq', 'ph', 'th', 'tt', 'pp', 'tp', 'pt', 'header']
-    new_rcs = {}    
+    new_rcs = rcs    
     data_keys = ['tt', 'pp', 'tp', 'pt']
     
     # Parse input angles
     if _a!= None:            
         nA = len(_a)
         if nA > 2:
-            print("Angle range too large. Pick a min and max only. ")
-            return
+            print("Extracting angles at {0}".format(str(_a)))
+            a_idx = []
+            for a in _a: 
+                idx = where(rcs['ph'] == a)[0][0]
+                a_idx.append(idx)
+                
+            new_rcs.update( {'ph':rcs['ph'][a_idx]} ) 
+            
+            for i in data_keys:
+                new_rcs.update( { i:rcs[i][:, a_idx] } )
         
         elif nA == 1:
             print("Extracting angles at {0}".format(str(_a)))
@@ -82,11 +90,12 @@ def extract_data(rcs, _f=None, _a=None, _pol=None):
             new_rcs.update( {'frq':rcs['frq'][f_idx[0]:f_idx[1]]} ) 
             
             for i in data_keys:
-                if len(rcs[i]) < f_idx: new_rcs.update({i:rcs[i]})
+                if len(rcs[i]) < max(f_idx): new_rcs.update({i:rcs[i]})
                 else: new_rcs.update( { i:rcs[i][f_idx[0]:f_idx[1], :] } )
                 
     else:
         print("No frequencies entered.")
+        new_rcs.update({'frq':rcs['frq']})
         
     return new_rcs
 

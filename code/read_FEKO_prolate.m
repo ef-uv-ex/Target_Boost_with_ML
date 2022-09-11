@@ -20,7 +20,11 @@ cd(dir_DATA);
 %% Load the FEKO data
 
 cd("G:\Rofrano_Thesis\Project\data\Prolate"); % From main drive
-tar_true = readFeko('prolate_far_field.ffe');
+tar_true = readFeko('prolate_ffe.ffe');
+
+% For some reason, this is getting flipped on import from feko...not sure y
+tar_true.pp = tar_true.pt;
+tar_true.pt = [];
 
 %% Save the thing
 
