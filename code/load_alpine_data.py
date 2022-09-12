@@ -130,10 +130,10 @@ if __name__ == '__main__':
     s_prolate = select_data(dir_DATA)
 
     # Plot the aximuth cut data
-    plot_data(m_prolate, s_prolate)
+    #plot_data(m_prolate, s_prolate)
 
-    #s_prolate = extract_data(s_prolate, _a=[0, 90, 180, 270])
-    #m_prolate = extract_data(m_prolate, _f=[9.5, 10.51], _a=[0, 90, 180, 270])
+    s_prolate = extract_data(s_prolate, _a=[0, 90, 180, 270])
+    m_prolate = extract_data(m_prolate, _f=[9.5, 10.51], _a=[0, 90, 180, 270])
     
 
     

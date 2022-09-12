@@ -4,7 +4,10 @@ Created on Fri Sep  9 13:01:09 2022
 
 @author: Administrator
 """
-
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.collections import PolyCollection
+import matplotlib
+from matplotlib import cm
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -19,57 +22,77 @@ def plot_data(m_rcs, s_rcs):
         plots
     """
     
+    """
+    Generates:
+        Figure 1:  3D plots for Rcs vs F at 4 angles with real and image data
+    """
+    
+    """Pull colors given a poly collection length -- expects 12 functions!!"""
+    n_funcs = 12
+    cmap = cm.magma
+    idx = np.linspace(0, cmap.N, n_funcs)/cmap.N # normalize between 0 and 1
+    cmap = cmap(idx)
+    colors = []
+    for c in cmap:
+        colors.append(matplotlib.colors.rgb2hex(c))
+       
+    
     """Pre-process data"""
-    a = s_rcs['ph']*(np.pi/180)
-    f = [9.5, 10, 10.5] # Frequencies to grab for plots
-    f_keys = ['9.5 GHz', '10 GHz', '10.5 GHz']
+    f = s_rcs['frq']
+    a = [0, 90, 180, 270]
+    keys = ['0', '90', '180', '270']
     s_h = {}
     s_v = {}
     m_h = {}
     m_v = {}
-    for i, v in enumerate(f):
-        idx = (np.where(s_rcs['frq']==v)[0][0])
+    # Pull columns with the correct angle
+    for i, v in enumerate(a):
+        idx = (np.where(s_rcs['ph']==v)[0][0])
         
-        s = np.log10(np.abs(s_rcs['pp'][idx, :]))
-        s_h.update( {f_keys[i] : s} )
+        temp = []
+        # Single polarization to practice
+        temp.append(list(zip(f, s_rcs['pp'][:, idx].real)))       # Pull reals
+        temp.append(list(zip(f, s_rcs['pp'][:, idx].imag)))       # Pull Imag
+        temp.append(list(zip(f, np.abs(s_rcs['pp'][:, idx]))))
+        s_h.update( {keys[i] : temp} )
         
-        s = np.log10(np.abs(s_rcs['tt'][idx, :]))
-        s_v.update( {f_keys[i] : s} )
+    """Build the figure"""
+    fig = plt.figure()
+    ax = plt.axes(projection='3d')
         
-        s = np.log10(np.abs(m_rcs['pp'][idx, :]))
-        m_h.update( {f_keys[i] : s} )
-        
-        s = np.log10(np.abs(m_rcs['tt'][idx, :]))
-        m_v.update( {f_keys[i] : s} )
-        
-    """Create Polar plots:  """
-    # Plot polar
+    """Create the Poly collection 3D Plots """
+    c = np.asarray([0, 3])
+    z = [1, 2, 3]
+    # for k in s_h.keys():
+    #     poly = PolyCollection(s_h[k], facecolors=colors[c[0]:c[-1]])
+    #     poly.set_alpha(0.7)
+    #     ax.add_collection3d(poly, zs=z, zdir='y')
+    #     c = c+4
+    #     z = z+1
 
-    # Horizontal Polarization
-    fig, ax = plt.subplots(2, 3, subplot_kw={'projection': 'polar'})
-    fig.suptitle('Horizontally Polarized Incident Wave')
-    for i, v in enumerate(f_keys): 
-        ax[0, i].plot(a, s_h[v], label=v)
-        ax[0, i].set_title('Normalized Simulation RCS, \n '+v)
-        ax[0, i].grid(True)
-        
-        ax[1, i].plot(a, m_h[v], label=v)
-        ax[1, i].set_title('Normalized Measurement RCS, \n '+v)
-        ax[1, i].grid(True)
+    poly = PolyCollection(s_h['0'])#, facecolors=colors[c[0]:c[-1]])
+    poly.set_alpha(0.7)
+    ax.add_collection3d(poly, zs=z, zdir='y')
+
+    """Set Collection locations, and adjust the plots"""
+    ax.set_xlabel('Freqeuncy, [GHz]')
+    ax.set_xlim3d(f[0], f[-1])
+    ax.set_xticks(np.arange(f[0], f[-1], 0.5))
+    ax.set_ylabel('Angle, [deg]')
+    ax.set_ylim3d(1,3)
+    ax.set_yticks([1, 2, 3])
+    ax.set_zlabel('Magnitude, [V?]')
+    # ax.set_zlim3d(-0.00005, 0.00005)
+    # ax.set_zticks([-1, -0.5, 0, 0.5, 1])
+    ax.grid()
+
     plt.show()
     
-    # Vertical Polarization
-    fig, ax = plt.subplots(2, 3, subplot_kw={'projection': 'polar'})
-    fig.suptitle('Vertically Polarized Incident Wave')
-    for i, v in enumerate(f_keys): 
-        ax[0, i].plot(a, s_v[v], label=v)
-        ax[0, i].set_title('Normalized Simulation RCS, \n '+v) 
-        ax[0, i].grid(True)
-        
-        ax[1, i].plot(a, m_v[v], label=v)
-        ax[1, i].set_title('Normalized Measurement RCS, \n '+v)
-        ax[1, i].grid(True)
-    plt.show()
+    
+    
+    
+    
+    
     
     
     

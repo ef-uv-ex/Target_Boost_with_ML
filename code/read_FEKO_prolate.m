@@ -15,16 +15,23 @@ dir_FIG = "G:\Rofrano_Thesis\Project\figures";
 dir_DATA = "G:\Rofrano_Thesis\Project\data";
 cd(dir_DATA);
 
-
+RCS_CLIM = [-60,20];
 
 %% Load the FEKO data
 
 cd("G:\Rofrano_Thesis\Project\data\Prolate"); % From main drive
-tar_true = readFeko('prolate_ffe.ffe');
+tar_true = readFeko('prolate_far_field.ffe');
 
-% For some reason, this is getting flipped on import from feko...not sure y
-tar_true.pp = tar_true.pt;
-tar_true.pt = [];
+% Rotate negative 90 to match the radar inputs
+tar_true = shiftData(tar_true, -90)
+
+tar_true.pp = tar_true.pt
+tar_true.pt = []
+
+%% Testing the output for the correct angles
+
+tar_true_10 = extractData(tar_true, 'frq', 10);
+plotRCS(tar_true_10, 'polar', 'copol', 'caxis', RCS_CLIM);
 
 %% Save the thing
 
@@ -35,17 +42,18 @@ save(filename, 'tar_true');
 
 %% Plot the FEKO results
 % close('all')
+% RCS_CLIM = [-60,20];
 % 
 % % Plot global RCS
-% plotGlobalRCS(tar_true, 'caxis',RCS_CLIM);
-% plotGlobalRCS(tar_true, 'caxis',RCS_CLIM);
+% plotGlobalRCS(tar_true);
+% plotGlobalRCS(tar_true);
 % 
 % % Plot RCS cuts in polar format
-% tar_true_7 = extractData(tar_true, 'frq', 7);
-% plotRCS(tar_true_7, 'polar', 'copol', 'caxis',RCS_CLIM);
-% plotRCS(tar_true_7, 'copol', 'caxis',RCS_CLIM);
+% tar_true_10 = extractData(tar_true, 'frq', 10);
+% plotRCS(tar_true_10, 'polar', 'copol');
+% plotRCS(tar_true_10, 'copol');
 % 
-% filename = strcat(t, '_prolate_true');
-% save(filename, 'prolate_true');
+% % filename = strcat(t, '_prolate_true');
+% % save(filename, 'prolate_true');
 
 

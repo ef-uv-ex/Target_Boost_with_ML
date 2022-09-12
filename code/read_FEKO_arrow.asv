@@ -23,8 +23,7 @@ RCS_CLIM = [-60,20];
 cd("G:\Rofrano_Thesis\Project\data\Mini_Arrow"); % From main drive
 tar_true = readFeko('mini_arrow_ffe.ffe');
 
-% Rotate negative 90 to match the radar inputs
-tar_true = shiftData(tar_true, -90)
+
 
 %% Testing the output for the correct angles
 

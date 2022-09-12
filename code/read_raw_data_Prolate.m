@@ -50,10 +50,15 @@ plotGlobalRCS(tar_cal, 'caxis',RCS_CLIM);
 plotGlobalRCS(tar_cal, 'caxis',RCS_CLIM);
 
 % Plot RCS cuts in polar format
-tar_cal_7 = extractData(tar_cal, 'frq', 10);
-plotRCS(tar_cal_7, 'polar', 'copol', 'caxis',RCS_CLIM);
-plotRCS(tar_cal_7, 'copol', 'caxis',RCS_CLIM);
+tar_cal_10 = extractData(tar_cal, 'frq', 10);
+plotRCS(tar_cal_10, 'polar', 'copol', 'caxis',RCS_CLIM);
+plotRCS(tar_cal_10, 'copol', 'caxis',RCS_CLIM);
 
+plotCompositeISAR(tar_cal, 'raxis',[-15 15])
+plotCompositeISAR(tar_true, 'raxis',[-15 15])
+
+tar_true_10 = extractData(tar_true, 'frq', 10);
+plotRCS(tar_true_10, 'polar', 'copol', 'caxis',RCS_CLIM);
 
 %% Load the FEKO data
 

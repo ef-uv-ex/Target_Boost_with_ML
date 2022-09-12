@@ -49,38 +49,40 @@ def select_data(_dir_DATA):
     rcs.update({'frq' : np.asarray(data[0])[0]})
     rcs.update({'ph' : np.asarray(data[1])[0]})
     rcs.update({'th' : data[2]})
-    rcs.update({'tt' : np.asarray(data[12])})
-    rcs.update({'pp' : np.asarray(data[13])})
-    rcs.update({'tp': data[14]})
-    rcs.update({'pt' : data[15]})
+    # The readFEKO script multiplies raw values by sqrt(4*PI)
+    rcs.update({'tt' : np.asarray(data[12])/np.sqrt(4*np.pi)})
+    rcs.update({'pp' : np.asarray(data[13]/np.sqrt(4*np.pi))})
+    rcs.update({'tp': data[14]/np.sqrt(4*np.pi)})
+    rcs.update({'pt' : data[15]/np.sqrt(4*np.pi)})
     rcs.update({'header' : data[16]})
     
     # Process probability info
-    mean_labels = [['fm_tt', 'fm_pp'],
-                   ['am_tt', 'am_pp']]
+    """This will likely be moved to a section that is called post normalization"""
+    # mean_labels = [['fm_tt', 'fm_pp'],
+    #                ['am_tt', 'am_pp']]
     
-    var_labels = [['fv_tt', 'fv_pp'],
-                  ['av_tt', 'av_pp']]
-    labels = {'mean':mean_labels, 'var':var_labels}
-    for key in labels.keys():
-        l = labels[key]
+    # var_labels = [['fv_tt', 'fv_pp'],
+    #               ['av_tt', 'av_pp']]
+    # labels = {'mean':mean_labels, 'var':var_labels}
+    # for key in labels.keys():
+    #     l = labels[key]
         
-        if key == 'mean':
-            "Mean response over all freqs per angle"
-            rcs.update( {l[0][0]:np.mean(rcs['tt'], axis=0)} )
-            rcs.update( {l[0][1]:np.mean(rcs['pp'], axis=0)} )
-            "Mean response over all angles per freq"
-            rcs.update( {l[1][0]:np.mean(rcs['tt'], axis=1)} )
-            rcs.update( {l[1][1]:np.mean(rcs['pp'], axis=1)} )
+    #     if key == 'mean':
+    #         "Mean response over all freqs per angle"
+    #         rcs.update( {l[0][0]:np.mean(rcs['tt'], axis=0)} )
+    #         rcs.update( {l[0][1]:np.mean(rcs['pp'], axis=0)} )
+    #         "Mean response over all angles per freq"
+    #         rcs.update( {l[1][0]:np.mean(rcs['tt'], axis=1)} )
+    #         rcs.update( {l[1][1]:np.mean(rcs['pp'], axis=1)} )
             
-        elif key == 'var':
-            # Mean over freqs
-            rcs.update( {l[0][0]:np.var(rcs['tt'], axis=0)} )
-            rcs.update( {l[0][1]:np.var(rcs['pp'], axis=0)} )
-            # Mean over angle
-            rcs.update( {l[1][0]:np.var(rcs['tt'], axis=1)} )
-            rcs.update( {l[1][1]:np.var(rcs['pp'], axis=1)} )
-    # End prob extraction
+    #     elif key == 'var':
+    #         # Mean over freqs
+    #         rcs.update( {l[0][0]:np.var(rcs['tt'], axis=0)} )
+    #         rcs.update( {l[0][1]:np.var(rcs['pp'], axis=0)} )
+    #         # Mean over angle
+    #         rcs.update( {l[1][0]:np.var(rcs['tt'], axis=1)} )
+    #         rcs.update( {l[1][1]:np.var(rcs['pp'], axis=1)} )
+    # # End prob extraction
 
     return rcs
 
