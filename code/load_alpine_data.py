@@ -22,7 +22,8 @@ from Process_IFFT import process_ifft
 from Select_Data import select_data
 from Process_FFE import process_ffe
 from Extract_Data import extract_data
-from Plot_Data import plot_data
+from Plot_Data import plot_data, plot_fnorms, plot_anorms
+from Norm_RCS import norm_data
 
 # %% Constants
 
@@ -132,13 +133,17 @@ if __name__ == '__main__':
     # Plot the aximuth cut data
     #plot_data(m_prolate, s_prolate)
 
-    s_prolate = extract_data(s_prolate, _a=[0, 90, 180, 270])
-    m_prolate = extract_data(m_prolate, _f=[9.5, 10.51], _a=[0, 90, 180, 270])
+    s_prolate = extract_data(s_prolate)#, _a=[0, 90, 180, 270])
+    m_prolate = extract_data(m_prolate, _f=[9.5, 10.51])#, _a=[0, 90, 180, 270])
     
-
+    s_prolate_norm_a = norm_data(s_prolate, a_flag=True)
+    s_prolate_norm_f = norm_data(s_prolate, f_flag=True)
     
+    m_prolate_norm_a = norm_data(m_prolate, a_flag=True)
+    m_prolate_norm_f = norm_data(m_prolate, f_flag=True)
     
-    
+    plot_fnorms(s_prolate_norm_f, m_prolate_norm_f)
+    plot_anorms(s_prolate_norm_a, m_prolate_norm_a)
     
     
     

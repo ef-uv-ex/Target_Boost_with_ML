@@ -88,6 +88,30 @@ def plot_data(m_rcs, s_rcs):
 
     plt.show()
     
+def plot_fnorms(s_rcs, m_rcs):
+    
+    # Plot the normed freq response at 1 angle
+    plt.figure('Normed RCS over Frequency at ph = 90')
+    f = s_rcs['frq']
+    s1 = s_rcs['tt'][:, 0]
+    s2 = m_rcs['tt'][:, 0]
+    plt.title('Normed RCS vs Frequency, \n $\phi=90^{\circ}$')
+    plt.xlabel('Frequency, [GHz]')
+    plt.ylabel('Normalized RCS')
+    plt.plot(f, s1, label='Sim')
+    plt.plot(f, s2, label='Meas')
+    plt.grid(which='both', axis='both')
+    # End Plot Fnorms
+
+def plot_anorms(s_rcs, m_rcs):
+    
+    a = s_rcs['ph']*np.pi/180
+    fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
+    fig.suptitle('Normalized RCS Bugsplat at f=10 GHz')
+    ax.plot(a, s_rcs['tt'][50, :], label='Sim')
+    ax.plot(a, m_rcs['tt'][50, :], label='Meas')
+    ax.grid(True)
+    plt.show()
     
     
     
