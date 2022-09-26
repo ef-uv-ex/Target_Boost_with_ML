@@ -1,0 +1,101 @@
+%% Load the data from the active data folder
+
+% Reads measurement data and produces useful plots, and saves the object
+
+clc;
+clear all;
+close all;
+
+% Grab data time
+format = 'yyyymmdd';
+t = datestr(now, format);
+
+% Object Data
+name = 'Oblate_Sphere';
+type = 'measurement';
+
+
+% Move directory
+dir_CODE = "G:\Rofrano_Thesis\Project\code";
+dir_FIG = "G:\Rofrano_Thesis\Project\figures";
+dir_DATA = "G:\Rofrano_Thesis\Project\data\Prolate";
+% dir_CODE = "C:\Users\mattr\OneDrive\Desktop\Target_Boost_with_ML\code";
+% dir_FIG = "C:\Users\mattr\OneDrive\Desktop\Target_Boost_with_ML\figures";
+% dir_DATA = "C:\Users\mattr\OneDrive\Desktop\Target_Boost_with_ML\data\Oblate";
+cd(dir_DATA);
+
+RCS_CLIM = [-60,20];
+
+%% Import and organize data
+
+% Load exact data
+cyl_750_exact = load('cyl750.mat').cyl750;
+
+% Load measured data
+cyl750_cbk = readLintek('cyl_mount.cbk');
+cyl750 = readLintek('cyl_750.cal');
+tar_cbk = readLintek('tar_mount.bkg');
+tar_nocal = readLintek('tar_oblate.tar');
+
+%% Calibrate
+
+% Calibrate the target
+tar_cal = calibrateRCS(tar_nocal, tar_cbk, cyl750, cyl750_cbk, cyl_750_exact);
+
+% Import Sim data
+cd("G:\Rofrano_Thesis\Project\data\Prolate"); % From main drive
+tar_true = readFeko('prolate_far_field.ffe');
+
+% Rotate negative 90 to match the radar inputs
+tar_true = shiftData(tar_true, -90)
+tar_true.pp = tar_true.pt
+tar_true.pt = []
+
+plotCalVerify(extractData(tar_cal,'ph',0, 'frq', [9.5, 10.5]),extractData(tar_true,'ph',0), 'pp', 'overlay');
+plotCalStats(tar_cal, tar_true)
+
+%% Save the thing
+
+cd(dir_DATA)
+filename = strcat(t, '_prolate');
+save(filename, 'tar_cal');
+
+%% Produce Plots
+close('all')
+
+% Plot global RCS
+plotGlobalRCS(tar_cal, 'caxis',RCS_CLIM);
+plotGlobalRCS(tar_cal, 'caxis',RCS_CLIM);
+
+% Plot RCS cuts in polar format
+tar_cal_10 = extractData(tar_cal, 'frq', 10);
+plotRCS(tar_cal_10, 'polar', 'copol', 'caxis',RCS_CLIM);
+plotRCS(tar_cal_10, 'copol', 'caxis',RCS_CLIM);
+
+plotCompositeISAR(tar_cal, 'raxis',[-15 15])
+plotCompositeISAR(tar_true, 'raxis',[-15 15])
+
+tar_true_10 = extractData(tar_true, 'frq', 10);
+plotRCS(tar_true_10, 'polar', 'copol', 'caxis',RCS_CLIM);
+
+%% Load the FEKO data
+
+% cd("G:\Rofrano_Thesis\RCS_Targets\Prolate_Spheroid");
+% tar_true = readFeko('mini_arrow_20220823.ffe')
+
+%% Plot the FEKO results
+% close('all')
+% 
+% % Plot global RCS
+% plotGlobalRCS(tar_true, 'caxis',RCS_CLIM);
+% plotGlobalRCS(tar_true, 'caxis',RCS_CLIM);
+% 
+% % Plot RCS cuts in polar format
+% tar_true_7 = extractData(tar_true, 'frq', 7);
+% plotRCS(tar_true_7, 'polar', 'copol', 'caxis',RCS_CLIM);
+% plotRCS(tar_true_7, 'copol', 'caxis',RCS_CLIM);
+% 
+% filename = strcat(t, '_prolate_true');
+% save(filename, 'prolate_true');
+
+

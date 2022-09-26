@@ -114,9 +114,68 @@ def plot_anorms(s_rcs, m_rcs):
     plt.show()
     
     
+def plot_calVerify(s_rcs, m_rcs, a=0, f=10, pol='tt'):
     
+    plt.close('all')
+    _s_rcs = s_rcs.copy()
+    _m_rcs = m_rcs.copy()
+    key = ['tt', 'pp', 'tp', 'pt']
     
+    # Plot the frequency data as a reference
     
+    """Plot the Error over Frequency"""
+    calVerify = {}
+    calVerify.update({'frq':_s_rcs['frq']})
+    temp = np.abs(_m_rcs[pol][:, a])/np.abs(_s_rcs[pol][:, a])
+    calVerify.update( {pol:20*np.log(temp)} )
+    
+    stats = [np.mean(calVerify[pol]), 
+             np.std(calVerify[pol])
+             ]
+    stats = np.round_(stats, decimals=2)
+    plt.figure(0)
+    plt.title('Normalized RCS vs Frequency, \n Polarization='+str(pol)+', $\phi=$'+str(a))
+    plt.plot(_s_rcs['frq'], _s_rcs[pol][:, a], label="Sim")
+    plt.plot(_m_rcs['frq'], _m_rcs[pol][:, a], label="Meas")
+    plt.grid(True)
+    plt.xlabel('Frequency, [GHz]')
+    plt.ylabel('Amplitude')
+    
+    # Plot frequency range at angle a
+    plt.figure(1)
+    plt.title('Normalized Calibration Error vs Frequency, \n Polarization='+str(pol)+', $\phi=$'+str(a))
+    plt.plot(calVerify['frq'], calVerify[pol], label=r'$\mu=$'+str(stats[0])+'\n $\sigma=$'+str(stats[1]))
+    plt.grid(True)
+    plt.xlabel('Frequency, [GHz]')
+    plt.ylabel('Amplitude, [dB]')
+    plt.legend()
+    
+    """Plot the Error over Angle"""
+    calVerify = {}
+    calVerify.update({'ph':_s_rcs['ph']})
+    temp = np.abs(_m_rcs[pol][f, :])/np.abs(_s_rcs[pol][f, :])
+    calVerify.update( {pol:20*np.log(temp)} )
+    
+    stats = [np.mean(calVerify[pol]), 
+             np.std(calVerify[pol])
+             ]
+    stats = np.round_(stats, decimals=2)
+    plt.figure(2)
+    plt.title('Normalized RCS vs Angle, \n Polarization='+str(pol)+', $f=$'+str(f)+' [GHz]')
+    plt.plot(_s_rcs['ph'], _s_rcs[pol][f, :], label="Sim")
+    plt.plot(_m_rcs['ph'], _m_rcs[pol][f, :], label="Meas")
+    plt.grid(True)
+    plt.xlabel(r'Angle, [$^{\circ}$]')
+    plt.ylabel('Amplitude')
+    
+    # Plot frequency range at angle a
+    plt.figure(3)
+    plt.title('Normalized Calibration Error vs Angle, \n Polarization='+str(pol)+', f='+str(f)+' [GHz]')
+    plt.plot(calVerify['ph'], calVerify[pol], label=r'$\mu=$'+str(stats[0])+'\n $\sigma=$'+str(stats[1]))
+    plt.grid(True)
+    plt.xlabel(r'Angle, [$^{\circ}$]')
+    plt.ylabel('Amplitude, [dB]')
+    plt.legend()
     
     
     

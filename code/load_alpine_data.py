@@ -15,7 +15,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os, time, math
 from datetime import datetime
-
+import pickle as pkl
 
 # Pull custom functions
 from Process_IFFT import process_ifft
@@ -24,6 +24,7 @@ from Process_FFE import process_ffe
 from Extract_Data import extract_data
 from Plot_Data import plot_data, plot_fnorms, plot_anorms
 from Norm_RCS import norm_data
+from Add_Noise import add_noise
 
 # %% Constants
 
@@ -104,7 +105,14 @@ def plotter(_fig_num, _data, _labels):
     plt.grid(which='both', axis='both', linestyle=':')
     plt.legend()
      
-
+""" Save object as pickle"""
+def save_object(_obj, _dir, _filename):
+    
+    os.chdir(_dir)
+    
+    with open(_filename+'.obj', 'wb') as outp:
+        pkl.dump(_obj, outp)
+# End object pick'ling
 
 
 # %% Main loop body
@@ -122,29 +130,56 @@ if __name__ == '__main__':
     # user_message(_text, usr_msg.prompt) 
     # s_arrow = select_data(dir_DATA)
     
-    _text = 'Load prolate measurement data.'
-    user_message(_text, usr_msg.prompt)    
-    m_prolate = select_data(dir_DATA)
+    # _text = 'Load prolate measurement data.'
+    # user_message(_text, usr_msg.prompt)    
+    # m_prolate = select_data(dir_DATA)
     
     _text = 'Load prolate simulated data.'
     user_message(_text, usr_msg.prompt) 
     s_prolate = select_data(dir_DATA)
+    
+    # _text = 'Load mini-arrow simulated data.'
+    # user_message(_text, usr_msg.prompt) 
+    # s_arrow = select_data(dir_DATA)
 
     # Plot the aximuth cut data
     #plot_data(m_prolate, s_prolate)
 
-    s_prolate = extract_data(s_prolate)#, _a=[0, 90, 180, 270])
-    m_prolate = extract_data(m_prolate, _f=[9.5, 10.51])#, _a=[0, 90, 180, 270])
+    """Process Prolate Data"""
+    #s_prolate = extract_data(s_prolate)#, _a=[0, 90, 180, 270])
+    # m_prolate = extract_data(m_prolate, _f=[9.5, 10.51])#, _a=[0, 90, 180, 270])
     
-    s_prolate_norm_a = norm_data(s_prolate, a_flag=True)
+    """Noise 'em up"""
+    s_prolate_noise = add_noise(s_prolate, SNR=20)
+    
     s_prolate_norm_f = norm_data(s_prolate, f_flag=True)
+    s_prolate_noise_norm_f = norm_data(s_prolate_noise, f_flag=True)
     
-    m_prolate_norm_a = norm_data(m_prolate, a_flag=True)
-    m_prolate_norm_f = norm_data(m_prolate, f_flag=True)
+    plot_anorms(s_prolate_norm_f, s_prolate_noise_norm_f)
+    """Pull norms"""
+    # s_prolate_norm_a = norm_data(s_prolate, a_flag=True)
+    # s_prolate_norm_f = norm_data(s_prolate, f_flag=True)
     
-    plot_fnorms(s_prolate_norm_f, m_prolate_norm_f)
-    plot_anorms(s_prolate_norm_a, m_prolate_norm_a)
+    # m_prolate_norm_a = norm_data(m_prolate, a_flag=True)
+    # m_prolate_norm_f = norm_data(m_prolate, f_flag=True)
+    
+    """Plot Norms"""
+    # plot_fnorms(s_prolate_norm_f, m_prolate_norm_f)
+    # plot_anorms(s_prolate_norm_a, m_prolate_norm_a)
     
     
+    """Process Arrow Data"""
+    # #s_prolate = extract_data(s_prolate)#, _a=[0, 90, 180, 270])
+    # #m_prolate = extract_data(m_prolate, _f=[9.5, 10.51])#, _a=[0, 90, 180, 270])
+    
+    # s_arrow_norm_a = norm_data(s_arrow, a_flag=True)
+    # s_arrow_norm_f = norm_data(s_arrow, f_flag=True)
+    
+    # #m_prolate_norm_a = norm_data(m_prolate, a_flag=True)
+    # #m_prolate_norm_f = norm_data(m_prolate, f_flag=True)
+    
+    # plot_fnorms(s_arrow_norm_f, s_arrow_norm_f)
+    # plot_anorms(s_arrow_norm_a, s_arrow_norm_a)
     
     
+    #save_object(s_prolate_norm_a, dir_DATA, 's_prolate_norm')
